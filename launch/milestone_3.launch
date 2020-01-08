@@ -1,0 +1,54 @@
+<launch>
+
+  <!-- Load roscopter Parameters -->
+  <rosparam command="load" file="$(find roscopter_sim)/params/multirotor.yaml"/>
+  <!-- change to aerowake parameters ++++ -->
+
+  <!-- Simulation -->
+  <include file="$(find rosflight_sim)/launch/base.launch">
+    <arg name="mav_name" value="multirotor"/> <!-- CHANGE TO aerowake_MIT ++++ -->
+  </include>
+
+  <!-- FCU communication -->
+  <node name="rosflight_io" pkg="rosflight" type="rosflight_io" output="screen">
+    <param name="udp" value="true"/>
+  </node>
+
+  <!-- RC --> <!-- make sure this works ++++ -->
+  <node name="rc_joy" pkg="rosflight_utils" type="rc_joy">
+    <remap from="RC" to="multirotor/RC"/>
+  </node>
+
+  <!-- Estimator -->
+  <node name="estimator" pkg="roscopter" type="ekf_node" output="screen">
+    <remap from="imu" to="imu/data"/>
+    <remap from="reference" to="multirotor/truth/NED"/>
+    <remap from="odom" to="odometry"/>
+    <rosparam command="load" file="$(find aerowake_sim)/params/ekf_params_sim.yaml"/>
+  </node>
+  <!-- >>>> in the Raven room, use a mocap_rectifier.py node to make the mocap data
+            look like multirotor/truth/NED <<<< -->
+
+  <!-- Control -->
+  <node name="controller" pkg="roscopter" type="controller" output="screen">
+    <remap from="estimate" to="odometry"/>
+  </node>
+
+  <!-- Motor Speed Calculator -->
+  <node name="motor_speed" pkg="aerowake_utils" type="motor_speed_calc.py" output="screen">
+    <remap from="signals" to="output_raw"/>
+    <remap from="motor_speeds" to="motor_omegas"/>
+  </node>
+
+  <!-- Disturbance Observer -->
+  <node name="unscented_kalman_filter_node" pkg="unscented_kalman_filter"
+        type="unscented_kalman_filter_node" output="screen">
+    <rosparam command="load" file="$(find aerowake_sim)/params/AWSIM-ukf-param.yaml" />
+    <!-- <remap from="odometry" to="odometry"/> -->
+    <remap from="motor_speed" to="motor_omegas"/>
+  </node>
+
+  <!-- Flight GUI for high-level commands and tuning -->
+  <!-- ++++ -->
+
+</launch>

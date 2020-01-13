@@ -1,13 +1,26 @@
 <launch>
-  <!-- <arg name="transmitter" default="false"/> -->
+  <!-- Parameters -->
+  <arg name="mav_name"      default="aerowake_MIT"/>
+  <arg name="sim_param"     default="aerowake_MIT"/>
+  <arg name="control_param" default="milestone_2_gains"/>
+  <arg name="ekf_param"     default="mit-uav-mocap"/>
+  <arg name="motor_param"   default="mit-uav-motor"/>
+  <arg name="frame_param"   default="mit-uav-frame"/>
+  <!-- FIRMWARE BRANCH: aerowake-no-rc -->
 
-  <!-- Load roscopter Parameters -->
-  <rosparam command="load" file="$(find roscopter_sim)/params/multirotor.yaml"/>
-  <!-- change to aerowake parameters ++++ -->
+  <!-- Parameter Files -->
+  <arg name="sim_paramfile"     default="$(find aerowake_params)/params/sim/$(arg sim_param).yaml"/>
+  <arg name="control_paramfile" default="$(find aerowake_params)/params/controller/$(arg control_param).yaml"/>
+  <arg name="ekf_paramfile"     default="$(find aerowake_params)/params/ekf/$(arg ekf_param).yaml"/>
+  <arg name="motor_paramfile"   default="$(find aerowake_params)/params/motor/$(arg motor_param).yaml"/>
+  <arg name="frame_paramfile"   default="$(find aerowake_params)/params/frame/$(arg frame_param).yaml"/>
 
-  <!-- Simulation -->
-  <include file="$(find rosflight_sim)/launch/base.launch">
-    <arg name="mav_name" value="multirotor"/> <!-- CHANGE TO aerowake_MIT ++++ -->
+  <!-- Simulation Environment -->
+  <include file="$(find aerowake_sim)/launch/gazebo_sim.launch">
+    <arg name="mav_name"   value="$(arg mav_name)"/>
+    <arg name="param_file" value="$(arg motor_paramfile)"/>
+    <arg name="motor_file" value="$(arg motor_paramfile)"/>
+    <arg name="frame_file" value="$(arg frame_paramfile)"/>
   </include>
 
   <!-- FCU communication -->
@@ -15,35 +28,21 @@
     <param name="udp" value="true"/>
   </node>
 
-  <!-- RC -->
-  <!-- <group if="$(arg transmitter)">
-    <node name="rc_joy" pkg="rosflight_utils" type="rc_joy" output="screen">
-      <remap from="RC" to="multirotor/RC"/>
-    </node>
-  </group>
-  <group unless="$(arg transmitter)">
-    <node name="rc_joy" pkg="rosflight_utils" type="blank_rc_joy" output="screen">
-      <remap from="RC" to="multirotor/RC"/>
-    </node>
-  </group> -->
-
   <!-- Estimator -->
   <node name="estimator" pkg="roscopter" type="ekf_node" output="screen">
+    <rosparam command="load" file="$(arg ekf_paramfile)"/>
     <remap from="imu" to="imu/data"/>
-    <remap from="reference" to="multirotor/truth/NED"/>
+    <remap from="reference" to="$(arg mav_name)/truth/NED"/>
     <remap from="odom" to="odometry"/>
-    <rosparam command="load" file="$(find aerowake_sim)/params/ekf_params_sim.yaml"/>
   </node>
-  <!-- >>>> in the Raven room, use a mocap_rectifier.py node to make the mocap data
-            look like multirotor/truth/NED <<<< -->
 
   <!-- Control -->
   <node name="controller" pkg="roscopter" type="controller" output="screen">
+    <rosparam command="load" file="$(arg control_paramfile)"/>
     <remap from="estimate" to="odometry"/>
   </node>
 
   <!-- Flight GUI for high-level commands and tuning -->
-  <node name="tuning_gui" pkg="rqt_gui" type="rqt_gui" output="screen"
-        args="--perspective-file $(find aerowake_tuning_gui)/perspectives/aerowake_tuning.perspective"/>
+  <include file="$(find aerowake_tuning_gui)/launch/tuning_gui.launch"/>
 
 </launch>

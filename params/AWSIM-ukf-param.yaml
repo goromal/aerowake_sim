@@ -18,25 +18,27 @@ R_attitude: 0.01
 R_angularvelocity: 0.01
 
 # MAV model (based entirely off of default roscopter/rosflight_sim parameters ++++)
-vehicle_param:
- mass: 2.0
- inertia: [0.07, 0.08, 0.12]
- drag_constant: 8.06428e-05
- rotor_inertia: 3.7404e-05
- kn_constant: 2.216e-5 # 8.54858e-6
- km_constant: 0.0158 # 1.6e-2
-
-rotor_positions: [ 0.1926,  0.230, -0.0762,
-                  -0.1907,  0.205, -0.0762,
-                  -0.1907, -0.205, -0.0762,
-                   0.1926, -0.230, -0.0762]
-
-rotor_vector_normal: [-0.02674078,  0.0223925,  -0.99939157,
-                       0.02553726,  0.02375588, -0.99939157,
-                       0.02553726, -0.02375588, -0.99939157,
-                      -0.02674078, -0.0223925,  -0.99939157]
-
-rotor_rotation_directions: [-1, 1, -1, 1]
+# vehicle_param:
+#  mass: 2.0
+#  inertia: [0.07, 0.08, 0.12]
+#  drag_constant: 8.06428e-05
+#  rotor_inertia: 3.7404e-05
+#  kn_constant: 2.216e-5 # 8.54858e-6
+#  km_constant: 0.0158 # 1.6e-2
+#
+# num_rotors: 4
+#
+# rotor_positions: [ 0.1926,  0.230, -0.0762,
+#                   -0.1907,  0.205, -0.0762,
+#                   -0.1907, -0.205, -0.0762,
+#                    0.1926, -0.230, -0.0762]
+#
+# rotor_vector_normal: [-0.02674078,  0.0223925,  -0.99939157,
+#                        0.02553726,  0.02375588, -0.99939157,
+#                        0.02553726, -0.02375588, -0.99939157,
+#                       -0.02674078, -0.0223925,  -0.99939157]
+#
+# rotor_rotation_directions: [-1, 1, -1, 1]
 
 # Model mismatch tuning
 force_offset:

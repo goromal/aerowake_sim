@@ -16,10 +16,6 @@
   </include>
 
   <!-- ROSflight SIL node for simulating the flight control board + firmware -->
-<<<<<<< HEAD
-
-
-=======
   <node name="rosflight_sil" pkg="rosflight_sil" type="rosflight_sil_node" output="screen">
     <rosparam command="load" file="$(arg param_file)"/>
   </node>
@@ -58,6 +54,5 @@
 
   <!-- RVIZ -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find airwake_sim)/rviz/full.rviz" required="true"/>
->>>>>>> updated-launches
 
 </launch>

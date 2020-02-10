@@ -23,6 +23,7 @@
     <arg name="param_file" value="$(arg sim_paramfile)"/>
     <arg name="motor_file" value="$(arg motor_paramfile)"/>
     <arg name="frame_file" value="$(arg frame_paramfile)"/>
+    <arg name="auto_imu"   value="true"/>
   </include>
 
   <!-- FCU communication -->

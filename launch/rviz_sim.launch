@@ -4,7 +4,11 @@
   <arg name="param_file"/>
   <arg name="motor_file"/>
   <arg name="frame_file"/>
-  <arg name="env_file"/>
+  <arg name="camcfg_file"/>
+  <arg name="camcal_file"/>
+  <arg name="auto_imu" default="false"/>
+  <arg name="bind_host" default="localhost"/>
+  <arg name="remote_host" default="localhost"/>
 
   <!-- Launch an empty, headless Gazebo world, ONLY FOR THE CLOCK -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -17,19 +21,28 @@
 
   <!-- ROSflight SIL node for simulating the flight control board + firmware -->
   <node name="rosflight_sil" pkg="rosflight_sil" type="rosflight_sil_node" output="screen">
+    <param name="bind_host" value="$(arg bind_host)"/>
+    <param name="remote_host" value="$(arg remote_host)"/>
     <rosparam command="load" file="$(arg param_file)"/>
   </node>
+
+  <!-- Automatic IMU calibration, if desired -->
+  <group if="$(arg auto_imu)">
+    <node name="imu_calibrator" pkg="aerowake_utils" type="imu_calibrator.py" output="screen">
+      <param name="wait_secs" value="4"/>
+    </node>
+  </group>
 
   <!-- UAV dynamics nodes -->
   <node name="uav_dynamics" pkg="uav_dynamics" type="uav_dynamics_node" output="screen">
     <rosparam command="load" file="$(arg param_file)"/>
     <rosparam command="load" file="$(arg frame_file)"/>
+    <param name="mav_name" value="$(arg mav_name)"/>
   </node>
   <node name="world2NED" pkg="uav_dynamics" type="world_to_NED_broadcaster" output="screen"/>
 
   <!-- Air dynamics node -->
   <node name="air_dynamics" pkg="air_dynamics" type="air_dynamics_node" output="screen">
-    <rosparam command="load" file="$(arg env_file)"/>
     <rosparam command="load" file="$(arg motor_file)"/>
     <rosparam command="load" file="$(arg param_file)"/>
     <rosparam command="load" file="$(arg frame_file)"/>
@@ -38,12 +51,19 @@
 
   <!-- Boat dynamics node -->
   <node name="boat_dynamics" pkg="boat_dynamics" type="boat_dynamics_node" output="screen">
-    <rosparam command="load" file="$(arg env_file)"/>
+    <rosparam command="load" file="$(arg param_file)"/>
+  </node>
+
+  <!-- Simulated camera node -->
+  <node name="sim_cam" pkg="aerowake_vision" type="camera_sim_node" output="screen">
+    <rosparam command="load" file="$(arg camcfg_file)"/>
+    <rosparam command="load" file="$(arg camcal_file)"/>
+    <rosparam command="load" file="$(arg frame_file)"/>
+    <rosparam command="load" file="$(arg param_file)"/>
   </node>
 
   <!-- Tether dynamics -->
   <node name="tether_dynamics" pkg="tether_dynamics" type="tether_dynamics_node" output="screen">
-    <rosparam command="load" file="$(arg env_file)"/>
     <rosparam command="load" file="$(arg param_file)"/>
     <rosparam command="load" file="$(arg frame_file)"/>
     <remap from="uav_ext_wrench" to="tether_wrench"/>
@@ -53,6 +73,6 @@
   <node name="wrench_adder" pkg="aerowake_utils" type="wrench_adder.py" output="screen"/>
 
   <!-- RVIZ -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find airwake_sim)/rviz/full.rviz" required="true"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find aerowake_sim)/rviz/full.rviz" required="true"/>
 
 </launch>

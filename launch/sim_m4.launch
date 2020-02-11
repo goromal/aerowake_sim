@@ -1,0 +1,71 @@
+<launch>
+
+  <!-- ========== FCU (SIM) PARAMETERS FOR MILESTONE 4 =========== -->
+
+  <arg name="oil"           default="false"/>
+  <arg name="record"        default="false"/>
+  <arg name="mav_name"      default="aerowake_MIT"/>
+  <arg name="vis_cam"       default="false"/>
+
+  <arg name="sim_param"     default="aerowake_MIT"/>
+  <arg name="motor_param"   default="mit-uav-motor"/>
+  <arg name="frame_param"   default="mit-uav-frame"/>
+  <arg name="camcfg_param"  default="camera_config_GREENLIGHTS"/>
+  <arg name="camcal_param"  default="camera_calib"/>
+
+  <!-- =========================================================== -->
+
+  <!-- Serial Communication Parameters -->
+  <arg unless="$(arg oil)" name="obc_host"   default="localhost"/>
+  <arg unless="$(arg oil)" name="obc_port"   default="14525"/>
+  <arg unless="$(arg oil)" name="fcu_host"   default="localhost"/>
+  <arg unless="$(arg oil)" name="fcu_port"   default="14520"/>
+  <arg     if="$(arg oil)" name="obc_host"   default="192.168.1.1"/>
+  <arg     if="$(arg oil)" name="obc_port"   default="50000"/>
+  <arg     if="$(arg oil)" name="fcu_host"   default="192.168.1.140"/>
+  <arg     if="$(arg oil)" name="fcu_port"   default="50001"/>
+
+  <!-- Launch onboard algorithms on this machine if no odroid-in-loop -->
+  <group unless="$(arg oil)">
+    <include file="$(find aerowake_flight)/launch/obc_m4.launch">
+      <arg name="sim" value="true"/>
+      <arg name="oil" value="false"/>
+      <arg name="vicon" value="false"/>
+      <arg name="mav_name" value="$(arg mav_name)"/>
+      <arg name="record" value="$(arg record)"/>
+    </include>
+  </group>
+
+  <!-- Parameter Files -->
+  <arg name="sim_paramfile"     default="$(find aerowake_params)/params/sim/$(arg sim_param).yaml"/>
+  <arg name="motor_paramfile"   default="$(find aerowake_params)/params/motor/$(arg motor_param).yaml"/>
+  <arg name="frame_paramfile"   default="$(find aerowake_params)/params/frame/$(arg frame_param).yaml"/>
+  <arg name="camcfg_paramfile"  default="$(find aerowake_params)/params/camera/$(arg camcfg_param).yaml"/>
+  <arg name="camcal_paramfile"  default="$(find aerowake_params)/params/camera/$(arg camcal_param).yaml"/>
+
+  <!-- Simulation Environment + Firmware SIL -->
+  <include file="$(find aerowake_sim)/launch/support/rviz_sim.launch">
+    <arg name="mav_name"    value="$(arg mav_name)"/>
+    <arg name="param_file"  value="$(arg sim_paramfile)"/>
+    <arg name="motor_file"  value="$(arg motor_paramfile)"/>
+    <arg name="frame_file"  value="$(arg frame_paramfile)"/>
+    <arg name="camcfg_file" value="$(arg camcfg_paramfile)"/>
+    <arg name="camcal_file" value="$(arg camcal_paramfile)"/>
+    <arg name="auto_imu"    value="true"/>
+    <arg name="bind_host"   value="$(arg fcu_host)"/>
+    <arg name="bind_port"   value="$(arg fcu_port)"/>
+    <arg name="remote_host" value="$(arg obc_host)"/>
+    <arg name="remote_port" value="$(arg obc_port)"/>
+    <arg name="vis_cam"     value="$(arg vis_cam)"/>
+  </include>
+
+  <!-- Flight GUI for high-level commands and tuning -->
+  <include file="$(find aerowake_tuning_gui)/launch/tuning_gui.launch"/>
+
+  <!-- ROSbag recorder -->
+  <group if="$(arg record)">
+    <node name="recorder" pkg="rosbag" type="record" output="screen"
+          args="-o fcu_m4 /$(arg mav_name)/truth/NED"/> <!-- ++++ -->
+  </group>
+
+</launch>

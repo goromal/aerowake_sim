@@ -6,9 +6,12 @@
   <arg name="frame_file"/>
   <arg name="camcfg_file"/>
   <arg name="camcal_file"/>
+  <arg name="vis_cam" default="false"/>
   <arg name="auto_imu" default="false"/>
   <arg name="bind_host" default="localhost"/>
+  <arg name="bind_port" default="9090"/>
   <arg name="remote_host" default="localhost"/>
+  <arg name="remote_port" default="9091"/>
 
   <!-- Launch an empty, headless Gazebo world, ONLY FOR THE CLOCK -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -22,7 +25,9 @@
   <!-- ROSflight SIL node for simulating the flight control board + firmware -->
   <node name="rosflight_sil" pkg="rosflight_sil" type="rosflight_sil_node" output="screen">
     <param name="bind_host" value="$(arg bind_host)"/>
+    <param name="bind_port" value="$(arg bind_port)"/>
     <param name="remote_host" value="$(arg remote_host)"/>
+    <param name="remote_port" value="$(arg remote_port)"/>
     <rosparam command="load" file="$(arg param_file)"/>
   </node>
 
@@ -61,6 +66,11 @@
     <rosparam command="load" file="$(arg frame_file)"/>
     <rosparam command="load" file="$(arg param_file)"/>
   </node>
+  <group if="$(arg vis_cam)">
+    <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+      <remap from="image" to="simulated_camera_image"/>
+    </node>
+  </group>
 
   <!-- Tether dynamics -->
   <node name="tether_dynamics" pkg="tether_dynamics" type="tether_dynamics_node" output="screen">

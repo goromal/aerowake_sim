@@ -1,7 +1,6 @@
 <launch>
 
   <arg name="mav_name"/>
-  <arg name="rf_param_file"/>
   <arg name="param_file"/>
   <arg name="motor_file"/>
   <arg name="frame_file"/>
@@ -9,7 +8,6 @@
   <arg name="camcal_file"/>
   <arg name="vis_file"/>
   <arg name="vis_cam" default="false"/>
-  <arg name="auto_arm" default="false"/>
   <arg name="bind_host" default="localhost"/>
   <arg name="bind_port" default="9090"/>
   <arg name="remote_host" default="localhost"/>
@@ -32,17 +30,6 @@
     <param name="remote_port" value="$(arg remote_port)"/>
     <rosparam command="load" file="$(arg param_file)"/>
   </node>
-
-  <!-- Automatic IMU calibration, if desired -->
-  <group if="$(arg auto_arm)">
-    <node name="imu_calibrator" pkg="aerowake_utils" type="imu_calibrator.py" output="screen">
-      <param name="wait_secs" value="4.0"/>
-    </node>
-    <node name="automatic_armer" pkg="aerowake_utils" type="automatic_rc.py" output="screen">
-      <param name="rosflight_paramfile" value="$(arg rf_param_file)"/>
-      <param name="wait_secs" value="9.0"/>
-    </node>
-  </group>
 
   <!-- UAV dynamics nodes -->
   <node name="uav_dynamics" pkg="uav_dynamics" type="uav_dynamics_node" output="screen">

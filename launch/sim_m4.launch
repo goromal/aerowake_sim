@@ -7,14 +7,12 @@
   <arg name="mav_name"      default="aerowake_MIT"/>
   <arg name="vis_cam"       default="false"/>
 
-  <arg name="rf_param"      default="rosflight_params"/>
   <arg name="sim_param"     default="aerowake_MIT"/>
   <arg name="motor_param"   default="mit-uav-motor"/>
   <arg name="frame_param"   default="mit-uav-frame"/>
   <arg name="vis_param"     default="mit-uav-sim"/>
   <arg name="camcfg_param"  default="camera_config_GREENLIGHTS"/>
   <arg name="camcal_param"  default="calib-small-1"/>
-  <arg name="bench_param"   default="vis-bench"/>
 
   <!-- =========================================================== -->
 
@@ -37,30 +35,28 @@
       <arg name="oil" value="false"/>
       <arg name="vicon" value="false"/>
       <arg name="mav_name" value="$(arg mav_name)"/>
+      <arg name="auto_arm" value="true"/>
+      <arg name="vis_debug" value="1"/>
       <!-- <arg name="record" value="$(arg record)"/> -->
     </include>
   </group>
 
   <!-- Parameter Files -->
-  <arg name="rf_paramfile"      default="$(find aerowake_params)/params/$(arg rf_param).yml"/>
   <arg name="sim_paramfile"     default="$(find aerowake_params)/params/sim/$(arg sim_param).yaml"/>
   <arg name="motor_paramfile"   default="$(find aerowake_params)/params/motor/$(arg motor_param).yaml"/>
   <arg name="frame_paramfile"   default="$(find aerowake_params)/params/frame/$(arg frame_param).yaml"/>
   <arg name="vis_paramfile"     default="$(find aerowake_params)/params/vision/$(arg vis_param).yaml"/>
   <arg name="camcfg_paramfile"  default="$(find aerowake_params)/params/camera/$(arg camcfg_param).yaml"/>
   <arg name="camcal_paramfile"  default="$(find aerowake_params)/params/camera/$(arg camcal_param).yaml"/>
-  <arg name="bench_paramfile"   default="$(find aerowake_params)/params/bench/$(arg bench_param).yaml"/>
 
   <!-- Simulation Environment + Firmware SIL -->
   <include file="$(find aerowake_sim)/launch/support/rviz_sim.launch">
     <arg name="mav_name"    value="$(arg mav_name)"/>
-    <arg name="rf_param_file" value="$(arg rf_paramfile)"/>
     <arg name="param_file"  value="$(arg sim_paramfile)"/>
     <arg name="motor_file"  value="$(arg motor_paramfile)"/>
     <arg name="frame_file"  value="$(arg frame_paramfile)"/>
     <arg name="camcfg_file" value="$(arg camcfg_paramfile)"/>
     <arg name="camcal_file" value="$(arg camcal_paramfile)"/>
-    <arg name="auto_arm"    value="true"/>
     <arg name="bind_host"   value="$(arg fcu_host)"/>
     <arg name="bind_port"   value="$(arg fcu_port)"/>
     <arg name="remote_host" value="$(arg obc_host)"/>
@@ -70,9 +66,9 @@
   </include>
 
   <!-- Flight GUI for high-level commands and tuning -->
-  <node name="benchmarker" pkg="aerowake_utils" type="benchmark_commander.py" output="screen">
+  <!-- <node name="benchmarker" pkg="aerowake_utils" type="benchmark_commander.py" output="screen">
     <rosparam command="load" file="$(arg bench_paramfile)"/>
-  </node>
+  </node> -->
   <!-- <include file="$(find aerowake_tuning_gui)/launch/tuning_gui.launch"/> -->
 
   <!-- ROSbag recorder for vision system testing -->

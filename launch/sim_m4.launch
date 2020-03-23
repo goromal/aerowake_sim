@@ -6,6 +6,7 @@
   <arg name="record"        default="false"/>
   <arg name="mav_name"      default="aerowake_MIT"/>
   <arg name="vis_cam"       default="false"/>
+  <arg name="auto_arm"      default="true"/>
 
   <arg name="sim_param"     default="aerowake_MIT"/>
   <arg name="motor_param"   default="mit-uav-motor"/>
@@ -35,7 +36,7 @@
       <arg name="oil" value="false"/>
       <arg name="vicon" value="false"/>
       <arg name="mav_name" value="$(arg mav_name)"/>
-      <arg name="auto_arm" value="true"/>
+      <arg name="auto_arm" value="$(arg auto_arm)"/>
       <arg name="vis_debug" value="1"/>
       <!-- <arg name="record" value="$(arg record)"/> -->
     </include>
@@ -72,9 +73,11 @@
   <!-- <include file="$(find aerowake_tuning_gui)/launch/tuning_gui.launch"/> -->
 
   <!-- ROSbag recorder for vision system testing -->
+  <arg unless="$(arg oil)" name="bagname" default="vision_sim"/>
+  <arg     if="$(arg oil)" name="bagname" default="vision_oil"/>
   <group if="$(arg record)">
     <node name="recorder" pkg="rosbag" type="record" output="screen"
-          args="-o $(find aerowake_sim)/bags/vision_bags/vision_sim.bag /$(arg mav_name)/rel_truth/NED /vision_pose"/>
+          args="-o $(find aerowake_sim)/bags/vision_bags/$(arg bagname).bag /$(arg mav_name)/rel_truth/NED /vision_pose"/>
   </group>
 
 </launch>

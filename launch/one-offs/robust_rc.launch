@@ -16,8 +16,9 @@
 
   <arg unless="$(arg sim)" name="auto_rc" default="false"/>
   <arg if="$(arg sim)" name="auto_rc" default="true"/>
-  <arg unless="$(arg sim)" name="oil" value="false"/>
-  <arg if="$(arg sim)" name="oil" value="true"/>
+  <!-- <arg unless="$(arg sim)" name="oil" value="false"/>
+  <arg if="$(arg sim)" name="oil" value="true"/> -->
+  <arg name="oil" default="false"/>
 
   <!-- Serial Communication Parameters -->
   <arg unless="$(arg oil)" name="obc_host" default="localhost"/>
@@ -38,8 +39,13 @@
     <arg name="camcfg_paramfile" default="$(find aerowake_params)/params/camera/$(arg camcfg_param).yaml"/>
     <arg name="camcal_paramfile" default="$(find aerowake_params)/params/camera/$(arg camcal_param).yaml"/>
 
+    <!-- If sim, play the original bag file; otherwise, will use hardware RC (no ROS nodes needed) -->
+    <!-- <node name="player" pkg="rosbag" type="play" args="-q clock $(find aerowake_sim)/bags/312_flight_bags/3-fell_why/FELLWHY.bag" output="screen"/> -->
+
     <!-- Simulation Environment + Firmware SIL -->
     <include file="$(find aerowake_sim)/launch/support/rviz_sim.launch">
+      <!-- BECAUSE WE ARE USING BAG CLOCK -->
+      <!-- <arg name="use_gazebo_clock" value="false"/>  -->
       <arg name="mav_name" value="$(arg mav_name)"/>
       <arg name="param_file" value="$(arg sim_paramfile)"/>
       <arg name="motor_file" value="$(arg motor_paramfile)"/>
@@ -54,11 +60,19 @@
       <arg name="vis_file" value="$(arg vis_paramfile)"/>
     </include>
 
-    <!-- If sim, play the original bag file; otherwise, will use hardware RC (no ROS nodes needed) -->
-    <node name="player" pkg="rosbag" type="play" output="-q --clock $(find aerowake_sim)/bags/312_flight_bags/3-fell_why/FELLWHY.bag">
-      <param name="rosflight_paramfile" value="$(arg rf_paramfile)"/>
-      <param name="wait_secs" value="9.0"/>
+    <!-- ROSflight -->
+    <node name="rosflight_io" pkg="rosflight" type="rosflight_io" output="screen">
+      <param name="udp" value="true"/>
+      <param name="bind_host" value="$(arg obc_host)"/>
+      <param name="bind_port" value="$(arg obc_port)"/>
+      <param name="remote_host" value="$(arg fcu_host)"/>
+      <param name="remote_port" value="$(arg fcu_port)"/>
+      <param name="port" value="/dev/rosflight"/>
     </node>
+
+    <!-- <node name="imu_calibrator" pkg="aerowake_utils" type="imu_calibrator.py" output="screen">
+      <param name="wait_secs" value="2.5"/>
+    </node> -->
 
   </group>
 

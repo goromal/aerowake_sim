@@ -7,20 +7,23 @@
   <arg name="camcfg_file"/>
   <arg name="camcal_file"/>
   <arg name="vis_file"/>
+  <arg name="use_gazebo_clock" default="true"/>
   <arg name="vis_cam" default="false"/>
   <arg name="bind_host" default="localhost"/>
   <arg name="bind_port" default="9090"/>
   <arg name="remote_host" default="localhost"/>
   <arg name="remote_port" default="9091"/>
 
-  <!-- Launch an empty, headless Gazebo world, ONLY FOR THE CLOCK -->
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="paused" value="false"/>
-    <arg name="gui" value="false"/>
-    <arg name="verbose" value="false"/>
-    <arg name="debug" value="false"/>
-    <arg name="world_name" value="worlds/empty.world"/>
-  </include>
+  <group if="$(arg use_gazebo_clock)">
+    <!-- Launch an empty, headless Gazebo world, ONLY FOR THE CLOCK -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="paused" value="false"/>
+      <arg name="gui" value="false"/>
+      <arg name="verbose" value="false"/>
+      <arg name="debug" value="false"/>
+      <arg name="world_name" value="worlds/empty.world"/>
+    </include>
+  </group>
 
   <!-- ROSflight SIL node for simulating the flight control board + firmware -->
   <node name="rosflight_sil" pkg="rosflight_sil" type="rosflight_sil_node" output="screen">
